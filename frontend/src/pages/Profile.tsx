@@ -110,15 +110,15 @@ export default function Profile() {
                   <div className="toggle-header">
                     <span className="toggle-text">Flouter mon pseudo dans les classements</span>
                     <label className="toggle-switch-wrapper">
-                      <input
-                        type="checkbox"
+                <input
+                  type="checkbox"
                         className="toggle-switch-input"
-                        checked={blurUsername}
-                        onChange={(e) => setBlurUsername(e.target.checked)}
-                        disabled={loading}
-                      />
+                  checked={blurUsername}
+                  onChange={(e) => setBlurUsername(e.target.checked)}
+                  disabled={loading}
+                />
                       <span className="toggle-switch-slider"></span>
-                    </label>
+              </label>
                   </div>
                   <small className="toggle-help">Votre nom apparaîtra flouté dans les classements publics</small>
                 </div>
