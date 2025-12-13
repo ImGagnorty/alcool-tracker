@@ -1,0 +1,204 @@
+.history {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+.history-header {
+  margin-bottom: 3rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.history-header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.history-header p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
+.history-loading,
+.empty-history {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-secondary);
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-history p {
+  margin-bottom: 0.75rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.history-day {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.history-day::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform var(--transition-base);
+}
+
+.history-day:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg), 0 0 30px var(--primary-soft);
+}
+
+.history-day:hover::before {
+  transform: scaleX(1);
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.day-header h2 {
+  font-size: 1.5rem;
+  color: var(--text);
+  text-transform: capitalize;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.day-count {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: start;
+  gap: 1.25rem;
+  transition: all var(--transition-base);
+}
+
+.history-item:hover {
+  transform: translateX(8px);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-sm), 0 0 15px var(--primary-soft);
+}
+
+.item-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px var(--primary-glow));
+}
+
+.item-content {
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+
+.item-details {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.item-time {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  margin-top: 0.5rem;
+}
+
+.item-notes {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  color: var(--text);
+  font-style: italic;
+  border-left: 3px solid var(--primary);
+}
+
+.delete-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  opacity: 0.6;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.delete-btn:hover:not(:disabled) {
+  opacity: 1;
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  transform: scale(1.1);
+}
+
+.delete-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

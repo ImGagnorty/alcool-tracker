@@ -1,0 +1,85 @@
+.fab-link,
+.fab-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.fab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xl), 0 0 30px var(--primary-glow);
+  transition: all var(--transition-base);
+  min-width: 64px;
+  min-height: 64px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.fab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fab:active::before {
+  opacity: 1;
+}
+
+.fab-icon {
+  font-size: 1.75rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  z-index: 1;
+}
+
+.fab-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .fab-link,
+  .fab-button {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .fab {
+    min-width: 56px;
+    min-height: 56px;
+    padding: 0.875rem;
+  }
+
+  .fab-icon {
+    font-size: 1.5rem;
+  }
+
+  .fab-label {
+    font-size: 0.6875rem;
+  }
+}
+

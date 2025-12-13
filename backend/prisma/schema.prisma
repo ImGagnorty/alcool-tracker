@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(uuid())
+  email         String       @unique
+  password      String
+  name          String?
+  isPremium     Boolean      @default(false)
+  premiumUntil  DateTime?
+  blurUsername  Boolean      @default(false) // Flouter le pseudo dans les classements
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  consumptions  Consumption[]
+  barReviews    BarReview[]
+  favorites     UserFavorite[]
+  clanMembers   ClanMember[]
+  sentInvitations ClanInvitation[] @relation("Inviter")
+  receivedInvitations ClanInvitation[] @relation("Invite")
+  
+  @@map("users")
+}
+
+model Alcohol {
+  id            String       @id @default(uuid())
+  name          String
+  brand         String
+  type          AlcoholType
+  alcoholRate   Float        // Taux d'alcool en %
+  sugarRate     Float?       // Taux de sucre en g/L
+  price         Float?       // Prix moyen en euros (pour le format standard)
+  volume        Float        // Volume standard en mL (ex: 330mL pour bière, 50mL pour shot)
+  imageUrl      String?
+  description   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  consumptions  Consumption[]
+  favorites     UserFavorite[]
+  
+  @@map("alcohols")
+}
+
+enum AlcoholType {
+  BEER
+  WINE
+  VODKA
+  WHISKY
+  RUM
+  GIN
+  TEQUILA
+  CHAMPAGNE
+  COGNAC
+  LIQUEUR
+  CIDER
+  OTHER
+}
+
+model Consumption {
+  id            String       @id @default(uuid())
+  userId        String
+  alcoholId     String
+  quantity      Float        // Nombre de verres/unités
+  volumeConsumed Float?      // Volume réel consommé en mL (ex: 250 pour demi, 500 pour pinte)
+  format        String?      // Format choisi (ex: "Demi", "Pinte", "Shot 2cl", "Verre 12.5cl")
+  date          DateTime     @default(now())
+  barId         String?      // Pour version Premium
+  photoUrl      String?      // Pour version Premium
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alcohol       Alcohol      @relation(fields: [alcoholId], references: [id])
+  bar           Bar?         @relation(fields: [barId], references: [id])
+  
+  @@map("consumptions")
+}
+
+model UserFavorite {
+  id            String       @id @default(uuid())
+  userId        String
+  alcoholId     String
+  createdAt     DateTime     @default(now())
+  
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alcohol       Alcohol      @relation(fields: [alcoholId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, alcoholId]) // Un utilisateur ne peut avoir qu'une fois chaque alcool en favori
+  @@map("user_favorites")
+}
+
+model Bar {
+  id            String       @id @default(uuid())
+  name          String
+  address       String
+  latitude      Float?
+  longitude     Float?
+  city          String?
+  country       String       @default("France")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  consumptions  Consumption[]
+  reviews       BarReview[]
+  
+  @@map("bars")
+}
+
+model BarReview {
+  id            String       @id @default(uuid())
+  userId        String
+  barId         String
+  rating        Int          // 1-5 étoiles
+  comment       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bar           Bar          @relation(fields: [barId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, barId]) // Un utilisateur ne peut noter qu'une fois chaque bar
+  @@map("bar_reviews")
+}
+
+model Clan {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  city          String?
+  imageUrl      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  members       ClanMember[]
+  invitations   ClanInvitation[]
+  
+  @@map("clans")
+}
+
+enum ClanRole {
+  LEADER      // Chef : peut tout faire
+  MODERATOR   // Modérateur : peut inviter et virer
+  MEMBER      // Membre : ne peut rien faire
+}
+
+model ClanMember {
+  id            String       @id @default(uuid())
+  userId        String
+  clanId        String
+  role          ClanRole     @default(MEMBER)
+  joinedAt      DateTime      @default(now())
+  
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clan          Clan         @relation(fields: [clanId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, clanId]) // Un utilisateur ne peut être qu'une fois dans un clan
+  @@map("clan_members")
+}
+
+model ClanInvitation {
+  id            String       @id @default(uuid())
+  clanId        String
+  inviterId     String       // Celui qui envoie l'invitation
+  inviteeId     String?      // Celui qui reçoit (peut être null si invitation par pseudo)
+  inviteeUsername String?    // Pseudo de l'invité (si invitation par pseudo)
+  status        String       @default("pending") // pending, accepted, rejected
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  clan          Clan         @relation(fields: [clanId], references: [id], onDelete: Cascade)
+  inviter       User         @relation("Inviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee       User?        @relation("Invite", fields: [inviteeId], references: [id], onDelete: Cascade)
+  
+  @@map("clan_invitations")
+}
+

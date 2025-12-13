@@ -1,0 +1,112 @@
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  min-width: 320px;
+  max-width: 500px;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-xl);
+  z-index: 10000;
+  cursor: pointer;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid;
+  animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.toast:hover {
+  transform: translateX(-8px);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--danger);
+  color: #fecaca;
+}
+
+.toast-info {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--info);
+  color: #93c5fd;
+}
+
+.toast-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--warning);
+  color: #fbbf24;
+}
+
+.toast-icon {
+  font-size: 1.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-message {
+  flex: 1;
+  font-weight: 600;
+  line-height: 1.5;
+  font-size: 0.9375rem;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  opacity: 0.7;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .toast {
+    right: 1rem;
+    left: 1rem;
+    min-width: auto;
+    max-width: none;
+  }
+}

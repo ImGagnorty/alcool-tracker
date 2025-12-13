@@ -1,0 +1,322 @@
+.clans {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+.clans-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.clans-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+.clans-header p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.invitations-section,
+.my-clan-section,
+.no-clan-section {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.invitations-section h2,
+.my-clan-section h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.invitations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.invitation-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  gap: 1rem;
+}
+
+.invitation-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.invitation-info p {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.accept-btn,
+.reject-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.accept-btn {
+  background: var(--success);
+  color: white;
+}
+
+.reject-btn {
+  background: var(--bg-tertiary);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.clan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.clan-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.clan-city {
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.clan-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.invite-btn,
+.create-clan-btn,
+.leave-btn {
+  padding: 0.875rem 1.5rem;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.invite-btn:hover,
+.create-clan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.leave-btn {
+  background: var(--danger);
+  margin-top: 1rem;
+}
+
+.members-section {
+  margin-top: 2rem;
+}
+
+.members-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.member-role {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.remove-btn {
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.remove-btn:hover {
+  background: #dc2626;
+}
+
+.no-clan-section {
+  text-align: center;
+  padding: 3rem;
+}
+
+.no-clan-section p {
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  color: var(--text);
+}
+
+.modal-content .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.modal-content .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group textarea {
+  width: 100%;
+  padding: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cancel-btn {
+  background: var(--bg-secondary);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.confirm-btn {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .clans {
+    padding: 1rem 0.5rem;
+  }
+
+  .clan-header {
+    flex-direction: column;
+  }
+
+  .invitation-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .invitation-actions {
+    width: 100%;
+  }
+
+  .accept-btn,
+  .reject-btn {
+    flex: 1;
+  }
+}
+
