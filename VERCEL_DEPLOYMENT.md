@@ -1,122 +1,292 @@
-# 🚀 Guide de Déploiement sur Vercel - AlcoolTracker
 
-Guide complet étape par étape pour déployer AlcoolTracker (Frontend + Backend) sur Vercel.
-
-## 📋 Table des matières
-
-1. [Prérequis](#prérequis)
-2. [Préparation](#préparation)
-3. [Déploiement du Backend](#déploiement-du-backend)
-4. [Déploiement du Frontend](#déploiement-du-frontend)
-5. [Configuration des variables d'environnement](#configuration-des-variables-denvironnement)
-6. [Configuration de la base de données](#configuration-de-la-base-de-données)
-7. [Vérification et tests](#vérification-et-tests)
-8. [Dépannage](#dépannage)
-
----
-
-## 📋 Prérequis
-
-- ✅ Un compte GitHub (gratuit)
-- ✅ Un compte Vercel (gratuit) : [vercel.com](https://vercel.com)
-- ✅ Un compte pour la base de données PostgreSQL (gratuit) :
-  - [Supabase](https://supabase.com) (recommandé)
-  - [Neon](https://neon.tech)
-  - [Railway](https://railway.app)
-  - [Render](https://render.com)
-
----
-
-## 🔧 Préparation
-
-### 1. Créer les icônes PWA
-
-Avant de déployer, créez les icônes nécessaires :
-
-1. Utilisez `frontend/public/icon.svg` comme base
-2. Générez les fichiers PNG :
-   - `icon-192.png` (192x192 pixels)
-   - `icon-512.png` (512x512 pixels)
-3. Placez-les dans `frontend/public/`
-
-**Outils en ligne** :
-- [RealFaviconGenerator](https://realfavicongenerator.net/)
-- [PWA Builder](https://www.pwabuilder.com/imageGenerator)
-
-### 2. Créer les fichiers .env.example (optionnel mais recommandé)
-
-Créez `backend/.env.example` :
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/alcool_tracker
-JWT_SECRET=your-super-secret-jwt-key
-PORT=3001
-FRONTEND_URL=http://localhost:3000
-NODE_ENV=development
-```
-
-Créez `frontend/.env.example` :
-```env
-VITE_API_URL=
-```
-
-### 3. Préparer le repository GitHub
-
-Si ce n'est pas déjà fait, créez un repository GitHub :
-
-```bash
-# Initialiser git (si pas déjà fait)
-git init
-
-# Ajouter tous les fichiers
-git add .
-
-# Créer un commit
-git commit -m "Initial commit"
-
-# Créer un repository sur GitHub, puis :
-git remote add origin https://github.com/votre-username/alcool-tracker.git
-git branch -M main
-git push -u origin main
-```
-
----
-
-## 🗄️ Configuration de la Base de Données
-
-### Option 1 : Supabase (Recommandé - Gratuit)
-
-1. **Créer un compte** sur [supabase.com](https://supabase.com)
-2. **Créer un nouveau projet**
-3. **Récupérer la connection string** :
-   - Allez dans Settings → Database
-   - Copiez la "Connection string" (URI)
-   - Format : `postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres`
-
-### Option 2 : Neon (Gratuit)
-
-1. **Créer un compte** sur [neon.tech](https://neon.tech)
-2. **Créer un nouveau projet**
-3. **Récupérer la connection string** depuis le dashboard
-
-### 3. Exécuter les migrations
-
-Une fois la base de données créée, exécutez les migrations Prisma :
+**Méthode 1 : Via Prisma Studio (le plus simple)**
 
 ```bash
 cd backend
 
-# Mettre à jour DATABASE_URL dans .env
-# DATABASE_URL="postgresql://..."
+# Vérifier que DATABASE_URL est bien dans .env
+# Puis lancer Prisma Studio
+npx prisma studio
+```
 
-# Générer le client Prisma
+Si Prisma Studio s'ouvre dans votre navigateur, c'est que la connexion fonctionne ! 🎉
+
+**Méthode 2 : Via psql (terminal)**
+
+```bash
+# Installer psql (si pas déjà installé)
+# Windows: Télécharger depuis postgresql.org ou utiliser Git Bash
+# Mac: brew install postgresql
+# Linux: sudo apt-get install postgresql-client
+
+# Tester la connexion (remplacez par votre connection string complète)
+psql "postgresql://postgres:VOTRE_MOT_DE_PASSE@db.xxxxx.supabase.co:5432/postgres"
+```
+
+Si la connexion fonctionne, vous verrez :
+```
+psql (version...)
+Type "help" for help.
+
+postgres=#
+```
+
+Tapez `\q` pour quitter.
+
+#### 🐛 Dépannage - Erreur de connexion psql (Windows)
+
+Si vous obtenez une erreur comme :
+```
+psql: erreur : la connexion au serveur sur « db.xxxxx.supabase.co », port 5432 a échoué : Connect 274C/10060
+```
+
+**Solutions à essayer** :
+
+**Solution 1 : Ajouter SSL à la connection string** (Recommandé)
+
+Supabase nécessite souvent SSL. Ajoutez `?sslmode=require` à la fin :
+
+```bash
+psql "postgresql://postgres:VOTRE_MOT_DE_PASSE@db.xxxxx.supabase.co:5432/postgres?sslmode=require"
+```
+
+**Solution 2 : Encoder les caractères spéciaux dans le mot de passe**
+
+Si votre mot de passe contient des caractères spéciaux (comme `.`, `@`, `#`, etc.), vous devez les encoder en URL :
+
+- `.` devient `%2E`
+- `@` devient `%40`
+- `#` devient `%23`
+- `%` devient `%25`
+- etc.
+
+**Exemple** : Si votre mot de passe est `Gkc2408vlo.`, utilisez :
+```bash
+psql "postgresql://postgres:Gkc2408vlo%2E@db.xxxxx.supabase.co:5432/postgres?sslmode=require"
+```
+
+**Solution 3 : Utiliser le port 6543 avec Connection Pooling**
+
+Supabase recommande d'utiliser le port 6543 pour les connexions avec pooling :
+
+```bash
+# Récupérez la connection string "Connection pooling" dans Supabase
+# Elle utilise généralement le port 6543
+psql "postgresql://postgres.[PROJECT-REF]:VOTRE_MOT_DE_PASSE@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
+```
+
+**Solution 4 : Vérifier le firewall Windows**
+
+Le port 5432 peut être bloqué. Essayez :
+1. Ouvrir PowerShell en administrateur
+2. Exécuter : `New-NetFirewallRule -DisplayName "PostgreSQL" -Direction Outbound -LocalPort 5432 -Protocol TCP -Action Allow`
+
+**Solution 5 : Utiliser Prisma Studio à la place** (Plus simple)
+
+Si psql ne fonctionne pas, utilisez Prisma Studio qui gère automatiquement SSL et l'encodage :
+
+```bash
+cd backend
+npx prisma studio
+```
+
+**Solution 6 : Tester avec un outil graphique**
+
+Utilisez [DBeaver](https://dbeaver.io/) ou [pgAdmin](https://www.pgadmin.org/) qui gèrent mieux les connexions SSL et les caractères spéciaux.
+
+**Méthode 3 : Via un outil graphique**
+
+- **[DBeaver](https://dbeaver.io/)** (gratuit, multiplateforme) - Recommandé
+- **[pgAdmin](https://www.pgadmin.org/)** (gratuit, open source)
+- **[TablePlus](https://tableplus.com/)** (payant mais excellent)
+
+Dans ces outils, créez une nouvelle connexion PostgreSQL et utilisez :
+- **Host** : `db.xxxxx.supabase.co` (extrait de votre connection string)
+- **Port** : `5432`
+- **Database** : `postgres`
+- **User** : `postgres`
+- **Password** : Votre mot de passe
+
+#### ⚠️ Important - Sécurité
+
+- **Ne partagez JAMAIS votre connection string** publiquement
+- **Ne commitez JAMAIS** votre `.env` dans Git
+- Utilisez les **variables d'environnement** dans Vercel (voir section dédiée)
+- Le mot de passe est visible dans la connection string - gardez-la secrète !
+
+#### 📸 Aide visuelle - Où trouver la connection string dans Supabase
+
+**Navigation dans l'interface Supabase** :
+
+```
+┌─────────────────────────────────────────┐
+│  Supabase Dashboard                      │
+├─────────────────────────────────────────┤
+│  [🏠] Home                               │
+│  [📊] Table Editor                       │
+│  [🔐] Authentication                     │
+│  [🗄️] Database                           │
+│  [📝] SQL Editor                         │
+│  ...                                     │
+│  [⚙️] Settings  ← CLIQUEZ ICI           │
+└─────────────────────────────────────────┘
+
+Puis dans Settings :
+┌─────────────────────────────────────────┐
+│  Settings                                │
+├─────────────────────────────────────────┤
+│  General                                 │
+│  API                                     │
+│  Database  ← CLIQUEZ ICI                 │
+│  Auth                                    │
+│  Storage                                 │
+└─────────────────────────────────────────┘
+
+Dans Database Settings, scrollez jusqu'à :
+┌─────────────────────────────────────────┐
+│  Connection string                      │
+├─────────────────────────────────────────┤
+│  [URI] [Session] [Transaction]          │
+│                                         │
+│  postgresql://postgres:[YOUR-PASSWORD]  │
+│  @db.xxxxx.supabase.co:5432/postgres   │
+│                                         │
+│  [📋] Copy  ← CLIQUEZ POUR COPIER      │
+└─────────────────────────────────────────┘
+```
+
+**💡 Astuce** : Si vous ne voyez pas "Database" dans Settings, cherchez "Connection string" ou "Connection pooling" dans la page Database.
+
+### Option 2 : Neon (Gratuit)
+
+#### Étape 1 : Créer un compte et un projet
+
+1. **Aller sur Neon** : [neon.tech](https://neon.tech)
+2. **Cliquer sur "Sign Up"** et créer un compte (GitHub recommandé)
+3. **Créer un nouveau projet** :
+   - Cliquer sur "Create a project"
+   - **Nom du projet** : `alcool-tracker`
+   - **Region** : Choisissez la région la plus proche
+   - **PostgreSQL version** : Laissez la version par défaut (15 ou 16)
+   - Cliquer sur "Create project"
+   - ⏳ Attendez quelques secondes que le projet soit créé
+
+#### Étape 2 : Récupérer la connection string
+
+1. **Dans votre projet Neon**, vous verrez automatiquement la connection string
+2. **Ou allez dans "Connection Details"** dans le menu de gauche
+3. **Copier la "Connection string"** - Elle ressemble à :
+   ```
+   postgresql://username:password@ep-xxxxx-xxxxx.region.aws.neon.tech/neondb?sslmode=require
+   ```
+   
+   ⚠️ **Notez le mot de passe** affiché - vous ne pourrez plus le voir après !
+
+**Alternative - Connection string avec mot de passe** :
+Si vous avez besoin de mettre le mot de passe dans l'URL :
+```
+postgresql://username:VOTRE_MOT_DE_PASSE@ep-xxxxx-xxxxx.region.aws.neon.tech/neondb?sslmode=require
+```
+
+#### ⚠️ Important
+
+- Neon utilise **SSL par défaut** (`sslmode=require`) - c'est bien pour la sécurité
+- Le mot de passe n'est affiché qu'une seule fois - notez-le !
+- Vous pouvez réinitialiser le mot de passe dans les paramètres si nécessaire
+
+### 3. Exécuter les migrations
+
+Une fois la base de données créée et la connection string récupérée, exécutez les migrations Prisma :
+
+#### Étape 1 : Configurer le fichier .env
+
+1. **Créer un fichier `.env`** dans le dossier `backend/` (si pas déjà existant)
+2. **Ajouter la connection string** :
+
+**Pour Supabase** (avec SSL - recommandé) :
+```env
+# backend/.env
+DATABASE_URL="postgresql://postgres:VOTRE_MOT_DE_PASSE@db.xxxxx.supabase.co:5432/postgres?sslmode=require"
+```
+
+**Pour Supabase** (avec Connection Pooling - encore mieux) :
+```env
+# Utilisez la connection string "Connection pooling" depuis Supabase
+# Elle utilise généralement le port 6543 et fonctionne mieux
+DATABASE_URL="postgresql://postgres.[PROJECT-REF]:VOTRE_MOT_DE_PASSE@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
+```
+
+**Pour Neon** :
+```env
+DATABASE_URL="postgresql://username:VOTRE_MOT_DE_PASSE@ep-xxxxx-xxxxx.region.aws.neon.tech/neondb?sslmode=require"
+```
+
+⚠️ **Remplacez** :
+- `VOTRE_MOT_DE_PASSE` par votre vrai mot de passe
+- `xxxxx` par les valeurs de votre connection string
+
+⚠️ **Important - Caractères spéciaux dans le mot de passe** :
+
+Si votre mot de passe contient des caractères spéciaux (`.`, `@`, `#`, `%`, etc.), vous devez les encoder en URL dans la connection string :
+
+| Caractère | Encodage URL |
+|-----------|--------------|
+| `.` | `%2E` |
+| `@` | `%40` |
+| `#` | `%23` |
+| `%` | `%25` |
+| `&` | `%26` |
+| `+` | `%2B` |
+| `=` | `%3D` |
+| ` ` (espace) | `%20` |
+
+**Exemple** : Si votre mot de passe est `Gkc2408vlo.`, utilisez :
+```env
+DATABASE_URL="postgresql://postgres:Gkc2408vlo%2E@db.xxxxx.supabase.co:5432/postgres?sslmode=require"
+```
+
+💡 **Astuce** : Utilisez un outil en ligne pour encoder votre mot de passe : [URL Encoder](https://www.urlencoder.org/)
+
+#### Étape 2 : Exécuter les migrations
+
+```bash
+cd backend
+
+# 1. Générer le client Prisma (nécessaire avant les migrations)
 npx prisma generate
 
-# Exécuter les migrations
+# 2. Exécuter les migrations (crée les tables dans la base de données)
 npx prisma migrate deploy
 
-# (Optionnel) Remplir avec des données de test
+# 3. (Optionnel) Remplir avec des données de test
 npm run seed
 ```
+
+#### Vérifier que ça fonctionne
+
+Si tout s'est bien passé, vous devriez voir :
+```
+✅ Applied migration: 20251213003506_alcool_gag
+✅ Applied migration: 20251213012039_add_format_and_favorites
+✅ Applied migration: 20251213020254_add_clans_and_blur_username
+```
+
+#### 🐛 Problèmes courants
+
+**Erreur : "Can't reach database server"**
+- Vérifiez que la connection string est correcte
+- Vérifiez que vous avez bien remplacé `[YOUR-PASSWORD]` par votre mot de passe
+- Pour Supabase : Vérifiez que le projet est bien créé et actif
+- Pour Neon : Vérifiez que le projet n'est pas en pause (gratuit = pause après inactivité)
+
+**Erreur : "SSL connection required"**
+- Ajoutez `?sslmode=require` à la fin de votre connection string
+- Exemple : `postgresql://...@host:5432/db?sslmode=require`
+
+**Erreur : "password authentication failed"**
+- Vérifiez que le mot de passe est correct
+- Pour Supabase : Le mot de passe est celui défini lors de la création du projet
+- Pour Neon : Réinitialisez le mot de passe dans les paramètres si nécessaire
 
 ---
 
