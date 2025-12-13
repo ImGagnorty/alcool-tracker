@@ -1,10 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://alcool-tracker-backend.vercel.app/:path*"
-    }
-  ],
+  "rewrites": [],
   "headers": [
     {
       "source": "/manifest.json",

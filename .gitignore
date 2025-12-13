@@ -32,8 +32,8 @@ Thumbs.db
 *.db
 *.sqlite
 
-# Prisma
-backend/prisma/migrations/
+# Prisma (garder les migrations mais pas les fichiers générés)
+backend/prisma/migrations/*.sql
 
 # Uploads
 uploads/
