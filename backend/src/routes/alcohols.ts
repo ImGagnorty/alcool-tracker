@@ -83,8 +83,22 @@ router.get('/', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get alcohols error:', error);
-    res.status(500).json({ error: 'Failed to fetch alcohols' });
+    console.error('=== GET ALCOHOLS ERROR START ===');
+    console.error('Error type:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    try {
+      console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (e) {
+      console.error('Could not stringify error:', e);
+    }
+    console.error('=== GET ALCOHOLS ERROR END ===');
+    
+    res.status(500).json({ 
+      error: 'Failed to fetch alcohols',
+      message: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : String(error)) : 'Failed to fetch alcohols'
+    });
   }
 });
 
