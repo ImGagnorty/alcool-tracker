@@ -91,9 +91,19 @@ export default function Catalogue() {
         setFavorites(prev => new Set(prev).add(alcohol.id));
         setToast({ message: `${alcohol.name} ajouté aux favoris`, type: 'success' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling favorite:', error);
-      setToast({ message: 'Erreur lors de la modification des favoris', type: 'error' });
+      // Si l'alcool est déjà en favoris (400), on le retire de la liste locale
+      if (error.response?.status === 400 && error.response?.data?.error?.includes('Already')) {
+        setFavorites(prev => {
+          const newSet = new Set(prev);
+          newSet.add(alcohol.id);
+          return newSet;
+        });
+        setToast({ message: `${alcohol.name} est déjà dans vos favoris`, type: 'info' });
+      } else {
+        setToast({ message: error.response?.data?.error || 'Erreur lors de la modification des favoris', type: 'error' });
+      }
     }
   };
 
