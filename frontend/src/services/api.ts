@@ -1,9 +1,21 @@
 import axios from 'axios';
 
 // Utiliser la variable d'environnement en production, ou le proxy en développement
-// En production, VITE_API_URL doit être l'URL complète avec /api (ex: https://alcool-tracker.vercel.app/api)
+// En production, VITE_API_URL doit être l'URL complète du backend avec /api
+// Exemple: https://alcool-tracker.vercel.app/api (backend)
 // En développement, on utilise le proxy qui redirige /api vers localhost:3001
-let API_URL = import.meta.env.VITE_API_URL || '/api';
+let API_URL = import.meta.env.VITE_API_URL;
+
+// Si VITE_API_URL n'est pas défini en production, utiliser l'URL du backend par défaut
+if (!API_URL) {
+  if (import.meta.env.PROD) {
+    // En production, pointer vers le backend Vercel
+    API_URL = 'https://alcool-tracker.vercel.app/api';
+  } else {
+    // En développement, utiliser le proxy Vite
+    API_URL = '/api';
+  }
+}
 
 // S'assurer que l'URL se termine par /api si c'est une URL complète
 if (API_URL.startsWith('http') && !API_URL.endsWith('/api')) {
@@ -69,6 +81,18 @@ api.interceptors.response.use(
       delete api.defaults.headers.common['Authorization'];
       // Only redirect if we're not already on login/register page
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        window.location.href = '/login';
+      }
+    } else if (error.response?.status === 403) {
+      // Forbidden - might be CORS or authentication issue
+      console.error('403 Forbidden:', error.config?.url);
+      // If it's a CORS issue, the error won't have response data
+      if (!error.response?.data) {
+        console.error('Possible CORS issue - check backend CORS configuration');
+      }
+      // If user is not authenticated, redirect to login
+      const token = updateTokenFromStorage();
+      if (!token && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
         window.location.href = '/login';
       }
     }
