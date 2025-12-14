@@ -43,12 +43,14 @@ Maintenant, il faut configurer les variables d'environnement du backend :
 1. Retournez dans votre projet **backend** sur Vercel
 2. Allez dans **Settings** → **Environment Variables**
 3. Vérifiez/ajoutez ces variables :
-   - `NODE_ENV` = `production` ⚠️ **TRÈS IMPORTANT pour le CORS !**
+   - ⚠️ **NODE_ENV** : Ne définissez PAS cette variable dans Environment Variables ! Elle est définie automatiquement dans `vercel.json`
    - `FRONTEND_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `FRONTEND_VERCEL_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `DATABASE_URL` = Votre URL PostgreSQL
    - `JWT_SECRET` = Votre secret JWT
 4. Cochez : ✅ Production, ✅ Preview, ✅ Development pour toutes les variables
+   
+   ⚠️ **IMPORTANT** : Si vous avez déjà défini `NODE_ENV` comme variable d'environnement, **SUPPRIMEZ-LA** ! Elle est maintenant définie dans `vercel.json` pour éviter les conflits avec le build.
 5. Cliquez sur **"Save"**
 6. Vercel redéploiera automatiquement le backend
 

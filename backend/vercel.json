@@ -5,6 +5,9 @@
       "source": "/api/(.*)",
       "destination": "/api"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 
