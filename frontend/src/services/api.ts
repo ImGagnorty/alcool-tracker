@@ -84,16 +84,25 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     } else if (error.response?.status === 403) {
-      // Forbidden - might be CORS or authentication issue
-      console.error('403 Forbidden:', error.config?.url);
-      // If it's a CORS issue, the error won't have response data
-      if (!error.response?.data) {
-        console.error('Possible CORS issue - check backend CORS configuration');
-      }
-      // If user is not authenticated, redirect to login
-      const token = updateTokenFromStorage();
-      if (!token && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
-        window.location.href = '/login';
+      // Forbidden - usually means invalid/expired token or missing authentication
+      const errorMessage = error.response?.data?.error || 'Forbidden';
+      console.error('403 Forbidden:', error.config?.url, errorMessage);
+      
+      // Check if it's an authentication issue
+      if (errorMessage.includes('token') || errorMessage.includes('Invalid') || errorMessage.includes('expired')) {
+        // Token is invalid or expired - clear it and redirect to login
+        localStorage.removeItem('auth-storage');
+        delete api.defaults.headers.common['Authorization'];
+        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+          window.location.href = '/login';
+        }
+      } else {
+        // Other 403 errors (CORS, permissions, etc.)
+        const token = updateTokenFromStorage();
+        if (!token && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+          // No token at all - redirect to login
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
