@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
@@ -56,17 +56,15 @@ router.post('/register', async (req, res) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET;
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const jwtExpiresIn: string = process.env.JWT_EXPIRES_IN || '7d';
 
     if (!jwtSecret) {
       return res.status(500).json({ error: 'JWT secret not configured' });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, isPremium: user.isPremium },
-      jwtSecret as string,
-      { expiresIn: jwtExpiresIn }
-    );
+    const payload = { userId: user.id, email: user.email, isPremium: user.isPremium };
+    const options: jwt.SignOptions = { expiresIn: jwtExpiresIn as jwt.SignOptions['expiresIn'] };
+    const token = jwt.sign(payload, jwtSecret, options);
 
     res.status(201).json({
       user,
@@ -104,17 +102,15 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET;
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const jwtExpiresIn: string = process.env.JWT_EXPIRES_IN || '7d';
 
     if (!jwtSecret) {
       return res.status(500).json({ error: 'JWT secret not configured' });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, isPremium: user.isPremium },
-      jwtSecret as string,
-      { expiresIn: jwtExpiresIn }
-    );
+    const payload = { userId: user.id, email: user.email, isPremium: user.isPremium };
+    const options: jwt.SignOptions = { expiresIn: jwtExpiresIn as jwt.SignOptions['expiresIn'] };
+    const token = jwt.sign(payload, jwtSecret, options);
 
     res.json({
       user: {
