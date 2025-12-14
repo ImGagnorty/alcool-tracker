@@ -43,6 +43,11 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Root API endpoint
+app.get('/api', (req, res) => {
+  res.json({ status: 'ok', message: 'Alcool Tracker API is running', version: '1.0.0' });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Alcool Tracker API is running' });
