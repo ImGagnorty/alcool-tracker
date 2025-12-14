@@ -186,23 +186,61 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
+    console.log('Login request received');
+    
+    // Check environment variables first
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not configured');
+      return res.status(500).json({ error: 'Server configuration error: JWT_SECRET missing' });
+    }
+    
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL is not configured');
+      return res.status(500).json({ error: 'Server configuration error: DATABASE_URL missing' });
+    }
+    
     const { email, password } = loginSchema.parse(req.body);
+    console.log('Login attempt for email:', email);
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email }
+      });
+    } catch (dbError: any) {
+      console.error('Database error during user lookup:', dbError);
+      if (dbError.code === 'P1001' || dbError.code === 'P1000' || dbError.name === 'PrismaClientInitializationError') {
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
+        });
+      }
+      throw dbError;
+    }
 
     if (!user) {
+      console.log('User not found for email:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    console.log('User found, checking password...');
 
     // Check password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(password, user.password);
+    } catch (bcryptError) {
+      console.error('Bcrypt error:', bcryptError);
+      return res.status(500).json({ error: 'Password verification failed' });
+    }
 
     if (!isValidPassword) {
+      console.log('Invalid password for email:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    console.log('Password valid, generating token...');
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET;
@@ -214,7 +252,15 @@ router.post('/login', async (req, res) => {
 
     const payload = { userId: user.id, email: user.email, isPremium: user.isPremium };
     const options: jwt.SignOptions = { expiresIn: jwtExpiresIn as jwt.SignOptions['expiresIn'] };
-    const token = jwt.sign(payload, jwtSecret, options);
+    let token;
+    try {
+      token = jwt.sign(payload, jwtSecret, options);
+    } catch (jwtError) {
+      console.error('JWT signing error:', jwtError);
+      return res.status(500).json({ error: 'Token generation failed' });
+    }
+
+    console.log('Login successful for user:', user.id);
 
     res.json({
       user: {
@@ -228,11 +274,42 @@ router.post('/login', async (req, res) => {
       token
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+    console.error('=== LOGIN ERROR START ===');
+    console.error('Error type:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    try {
+      console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (e) {
+      console.error('Could not stringify error:', e);
     }
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('=== LOGIN ERROR END ===');
+    
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return res.status(400).json({ 
+        error: 'Invalid input', 
+        message: errorMessages,
+        details: error.errors 
+      });
+    }
+    
+    // Check for Prisma errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P1001' || prismaError.code === 'P1000' || prismaError.name === 'PrismaClientInitializationError') {
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
+        });
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'Login failed',
+      message: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : String(error)) : 'Login failed. Please check server logs for details.'
+    });
   }
 });
 
