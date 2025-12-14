@@ -54,6 +54,51 @@ Maintenant, il faut configurer les variables d'environnement du backend :
 
 ---
 
+## 🐛 Dépannage : Erreur "Command exited with 127"
+
+Si vous avez l'erreur `Command "npm run build" exited with 127` dans le backend :
+
+### Solution 1 : Vérifier la configuration Vercel
+
+1. Allez dans votre projet **backend** sur Vercel
+2. **Settings** → **General**
+3. Section **"Build and Development Settings"**
+4. Vérifiez **EXACTEMENT** ces valeurs :
+   - **Root Directory** : `backend` (sans slash, sans point)
+   - **Build Command** : `npm run build` (vérifiez qu'il n'y a pas de faute de frappe comme "nom")
+   - **Output Directory** : ⚠️ **LAISSEZ COMPLÈTEMENT VIDE** (rien du tout)
+   - **Install Command** : `npm install` (vérifiez qu'il n'y a pas de faute de frappe)
+   - **Framework Preset** : `Other`
+5. Cliquez sur **"Save"**
+6. Redéployez : **Deployments** → **...** → **Redeploy**
+
+### Solution 2 : Supprimer et recréer le projet
+
+Si ça ne fonctionne toujours pas :
+
+1. **Settings** → **General** → Scrollez en bas
+2. Cliquez sur **"Delete Project"**
+3. Recréez le projet :
+   - **Add New** → **Project**
+   - Importez le même repository
+   - **Root Directory** : `backend`
+   - **Build Command** : `npm run build`
+   - **Output Directory** : ⚠️ **VIDE**
+   - **Install Command** : `npm install`
+   - **Framework Preset** : `Other`
+4. Ajoutez vos variables d'environnement
+5. Déployez
+
+### Solution 3 : Vérifier les logs de build
+
+1. Allez dans **Deployments**
+2. Cliquez sur le dernier déploiement
+3. Cliquez sur **"Build Logs"**
+4. Regardez les premières lignes pour voir quelle commande est exécutée
+5. Vérifiez s'il y a des erreurs avant l'exécution de `npm run build`
+
+---
+
 ## ÉTAPE 4 : Tester (2 minutes)
 
 ### 4.1 Tester le frontend
