@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { leaderboardService, LeaderboardResponse, ClanLeaderboardResponse } from '../services/leaderboardService';
+import { leaderboardService, LeaderboardResponse, ClanLeaderboardResponse, LeaderboardEntry, ClanLeaderboardEntry } from '../services/leaderboardService';
 import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Toast from '../components/Toast';
@@ -75,7 +75,7 @@ export default function Leaderboard() {
     }
   };
 
-  const leaderboard: any = mode === 'solo' ? soloLeaderboard?.leaderboard : clanLeaderboard?.leaderboard;
+  const leaderboard: (LeaderboardEntry | ClanLeaderboardEntry)[] | undefined = mode === 'solo' ? soloLeaderboard?.leaderboard : clanLeaderboard?.leaderboard;
 
   return (
     <div className="leaderboard">
@@ -134,7 +134,7 @@ export default function Leaderboard() {
 
           <div className="leaderboard-list">
             {leaderboard && leaderboard.length > 0 ? (
-              leaderboard.map((entry, index) => {
+              leaderboard.map((entry: LeaderboardEntry | ClanLeaderboardEntry, index: number) => {
                 if (mode === 'clans') {
                   const clanEntry = entry as any;
                   return (

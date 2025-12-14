@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { statisticsService, Statistics, MostConsumedAlcohol } from '../services/statisticsService';
 import { consumptionService } from '../services/consumptionService';
 import { favoriteService } from '../services/favoriteService';
-import { alcoholService, Alcohol } from '../services/alcoholService';
+import { Alcohol } from '../services/alcoholService';
 import { getFormatsForType } from '../utils/alcoholFormats';
 import { format } from 'date-fns';
 import LoadingSpinner from '../components/LoadingSpinner';
