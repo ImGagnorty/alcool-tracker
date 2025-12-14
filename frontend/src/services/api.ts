@@ -40,10 +40,17 @@ updateTokenFromStorage();
 // Request interceptor to ensure token is always up to date
 api.interceptors.request.use(
   (config) => {
-    // Update token before each request
-    const token = updateTokenFromStorage();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only add token for API requests (not static files or auth routes)
+    // Static files are served directly by Vercel and don't go through axios
+    const isAuthRoute = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+    
+    // Only add token for authenticated API routes
+    if (!isAuthRoute && config.baseURL) {
+      // Update token before each request
+      const token = updateTokenFromStorage();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
