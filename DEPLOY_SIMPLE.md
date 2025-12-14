@@ -119,6 +119,59 @@ Si ça ne fonctionne toujours pas :
 
 ---
 
+## 🐛 Dépannage : Erreur 500 lors de l'inscription
+
+Si vous avez une erreur `500 (Internal Server Error)` lors de l'inscription :
+
+### Étape 1 : Vérifier les logs Vercel
+
+1. Allez dans votre projet **backend** sur Vercel
+2. **Deployments** → Cliquez sur le dernier déploiement
+3. Cliquez sur **"Runtime Logs"** (ou "Function Logs")
+4. Essayez de vous inscrire depuis le frontend
+5. Regardez les logs qui apparaissent - vous devriez voir l'erreur exacte
+
+### Étape 2 : Vérifier les variables d'environnement
+
+Dans **Settings** → **Environment Variables**, vérifiez que vous avez **EXACTEMENT** :
+
+- ✅ `DATABASE_URL` = Votre URL PostgreSQL complète (ex: `postgresql://user:pass@host:5432/db?sslmode=require`)
+- ✅ `JWT_SECRET` = Une chaîne aléatoire (générez-en une avec : `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+- ✅ `FRONTEND_URL` = `https://alcool-tracker-frontend.vercel.app`
+- ✅ `FRONTEND_VERCEL_URL` = `https://alcool-tracker-frontend.vercel.app`
+
+⚠️ **IMPORTANT** : Toutes ces variables doivent être cochées pour **Production, Preview, ET Development**
+
+### Étape 3 : Vérifier les migrations Prisma
+
+Les migrations doivent être exécutées sur votre base de données. Si ce n'est pas fait :
+
+1. Connectez-vous à votre base de données PostgreSQL (via Supabase, Neon, etc.)
+2. Ou exécutez les migrations via Prisma :
+   ```bash
+   cd backend
+   npx prisma migrate deploy
+   ```
+
+### Étape 4 : Erreurs courantes dans les logs
+
+**Si vous voyez "JWT_SECRET missing"** :
+- Ajoutez `JWT_SECRET` dans les variables d'environnement Vercel
+
+**Si vous voyez "DATABASE_URL missing"** :
+- Ajoutez `DATABASE_URL` dans les variables d'environnement Vercel
+
+**Si vous voyez "Can't reach database server"** :
+- Vérifiez que votre `DATABASE_URL` est correct
+- Vérifiez que votre base de données accepte les connexions externes
+- Pour Supabase : Vérifiez les paramètres de sécurité
+
+**Si vous voyez "relation 'users' does not exist"** :
+- Les migrations Prisma n'ont pas été exécutées
+- Exécutez `npx prisma migrate deploy`
+
+---
+
 ## ÉTAPE 4 : Tester (2 minutes)
 
 ### 4.1 Tester le frontend
