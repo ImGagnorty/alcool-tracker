@@ -66,11 +66,17 @@ Si vous avez l'erreur `Command "npm run build" exited with 127` dans le backend 
 2. **Settings** → **General**
 3. Section **"Build and Development Settings"**
 4. Vérifiez **EXACTEMENT** ces valeurs :
-   - **Root Directory** : `backend` (sans slash, sans point)
-   - **Build Command** : `npm run build` (vérifiez qu'il n'y a pas de faute de frappe comme "nom")
-   - **Output Directory** : ⚠️ **LAISSEZ COMPLÈTEMENT VIDE** (rien du tout)
-   - **Install Command** : `npm install` (vérifiez qu'il n'y a pas de faute de frappe)
+   - **Root Directory** : `backend` (sans slash, sans point, sans guillemets)
+   - **Build Command** : `npm run vercel-build` (utilisez cette commande au lieu de `npm run build`)
+   - **Output Directory** : ⚠️ **LAISSEZ COMPLÈTEMENT VIDE** (rien du tout, supprimez même le placeholder)
+   - **Install Command** : `npm install` (vérifiez qu'il n'y a pas de faute de frappe comme "nom")
    - **Framework Preset** : `Other`
+   
+   ⚠️ **TRÈS IMPORTANT** :
+   - Activez le toggle **"Override"** pour Build Command (il doit être bleu)
+   - Activez le toggle **"Override"** pour Output Directory (il doit être bleu) et laissez le champ vide
+   - Activez le toggle **"Override"** pour Install Command (il doit être bleu)
+   
 5. Cliquez sur **"Save"**
 6. Redéployez : **Deployments** → **...** → **Redeploy**
 
