@@ -29,6 +29,24 @@ Avant de cliquer sur "Deploy", cliquez sur **"Environment Variables"** et ajoute
 2. ⏳ Attendez 2-3 minutes
 3. ✅ Quand c'est terminé, vous verrez une URL comme : `https://alcool-tracker-frontend-xxxxx.vercel.app`
 
+⚠️ **IMPORTANT - Quelle URL utiliser ?**
+
+Vercel génère **2 types d'URLs** :
+
+1. **URL de Production (à utiliser)** : `https://alcool-tracker-frontend.vercel.app`
+   - ✅ URL principale, stable, ne change jamais
+   - ✅ Pointe toujours vers le dernier déploiement en production
+   - ✅ **C'est celle-ci que vous devez utiliser dans vos configurations !**
+
+2. **URL de Déploiement spécifique** : `https://alcool-tracker-frontend-9ybdurao7-gagnortys-projects.vercel.app`
+   - ⚠️ URL temporaire d'un déploiement spécifique
+   - ⚠️ Change à chaque nouveau déploiement
+   - ⚠️ **Ne PAS utiliser pour la configuration** (sauf pour tester un déploiement spécifique)
+
+**Pour trouver votre URL de production** :
+- Allez dans votre projet Vercel → **Settings** → **Domains**
+- Vous verrez l'URL de production principale (sans le hash)
+
 ⚠️ **Note sur les warnings npm** : Pendant le déploiement, vous pouvez voir des warnings comme :
 - `npm warn deprecated eslint@8.57.1`
 - `npm warn deprecated rimraf@3.0.2`
@@ -66,17 +84,11 @@ Si vous avez l'erreur `Command "npm run build" exited with 127` dans le backend 
 2. **Settings** → **General**
 3. Section **"Build and Development Settings"**
 4. Vérifiez **EXACTEMENT** ces valeurs :
-   - **Root Directory** : `backend` (sans slash, sans point, sans guillemets)
-   - **Build Command** : `npm run vercel-build` (utilisez cette commande au lieu de `npm run build`)
-   - **Output Directory** : ⚠️ **LAISSEZ COMPLÈTEMENT VIDE** (rien du tout, supprimez même le placeholder)
-   - **Install Command** : `npm install` (vérifiez qu'il n'y a pas de faute de frappe comme "nom")
+   - **Root Directory** : `backend` (sans slash, sans point)
+   - **Build Command** : `npm run build` (vérifiez qu'il n'y a pas de faute de frappe comme "nom")
+   - **Output Directory** : ⚠️ **LAISSEZ COMPLÈTEMENT VIDE** (rien du tout)
+   - **Install Command** : `npm install` (vérifiez qu'il n'y a pas de faute de frappe)
    - **Framework Preset** : `Other`
-   
-   ⚠️ **TRÈS IMPORTANT** :
-   - Activez le toggle **"Override"** pour Build Command (il doit être bleu)
-   - Activez le toggle **"Override"** pour Output Directory (il doit être bleu) et laissez le champ vide
-   - Activez le toggle **"Override"** pour Install Command (il doit être bleu)
-   
 5. Cliquez sur **"Save"**
 6. Redéployez : **Deployments** → **...** → **Redeploy**
 
