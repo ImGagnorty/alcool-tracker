@@ -64,7 +64,7 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, isPremium: user.isPremium },
-      jwtSecret,
+      jwtSecret as string,
       { expiresIn: jwtExpiresIn }
     );
 
@@ -112,7 +112,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, isPremium: user.isPremium },
-      jwtSecret,
+      jwtSecret as string,
       { expiresIn: jwtExpiresIn }
     );
 
