@@ -206,7 +206,7 @@ router.get('/timeline', authenticateToken, async (req: AuthRequest, res) => {
 router.get('/most-consumed', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { limit = '5' } = req.query;
-    const limitNum = parseInt(limit as string, 10);
+    const limitNum = parseInt(limit as string, 10) || 5;
 
     const consumptions = await prisma.consumption.findMany({
       where: {

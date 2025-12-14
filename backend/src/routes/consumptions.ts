@@ -43,12 +43,20 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       userId: req.userId
     };
 
-    if (startDate) where.date = { gte: new Date(startDate as string) };
+    if (startDate) {
+      const start = new Date(startDate as string);
+      if (!isNaN(start.getTime())) {
+        where.date = { gte: start };
+      }
+    }
     if (endDate) {
-      where.date = {
-        ...where.date,
-        lte: new Date(endDate as string)
-      };
+      const end = new Date(endDate as string);
+      if (!isNaN(end.getTime())) {
+        where.date = {
+          ...where.date,
+          lte: end
+        };
+      }
     }
     if (alcoholId) where.alcoholId = alcoholId;
 
@@ -233,7 +241,12 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res) => {
     if (req.body.quantity !== undefined) updateData.quantity = req.body.quantity;
     if (req.body.volumeConsumed !== undefined) updateData.volumeConsumed = req.body.volumeConsumed;
     if (req.body.format !== undefined) updateData.format = req.body.format;
-    if (req.body.date !== undefined) updateData.date = new Date(req.body.date);
+    if (req.body.date !== undefined) {
+      const date = new Date(req.body.date);
+      if (!isNaN(date.getTime())) {
+        updateData.date = date;
+      }
+    }
     if (req.body.notes !== undefined) updateData.notes = req.body.notes;
     
     // Premium features

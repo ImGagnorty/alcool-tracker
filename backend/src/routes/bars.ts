@@ -25,8 +25,8 @@ router.get('/', async (req, res) => {
   try {
     const { city, search, page = '1', limit = '50' } = req.query;
 
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 50;
     const skip = (pageNum - 1) * limitNum;
 
     const where: any = {};
