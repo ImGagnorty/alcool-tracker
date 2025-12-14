@@ -7,12 +7,18 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+// S'assurer que DATABASE_URL est défini (peut venir de POSTGRES_PRISMA_URL via config/env.ts)
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is not configured. Please set DATABASE_URL, POSTGRES_PRISMA_URL, or POSTGRES_URL');
+}
+
 // Configuration optimisée pour Vercel serverless et Supabase
 const prismaClientOptions = {
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      url: databaseUrl,
     },
   },
   // Configuration pour réduire les connexions

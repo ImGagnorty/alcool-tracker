@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { validateEnv } from './config/env';
 import { prisma } from './lib/prisma';
 
 // Routes
@@ -14,6 +15,19 @@ import leaderboardRoutes from './routes/leaderboard';
 import clanRoutes from './routes/clans';
 
 dotenv.config();
+
+// Valider et mapper les variables d'environnement (compatible Vercel-Supabase)
+try {
+  validateEnv();
+} catch (error) {
+  console.error('Erreur de configuration:', error);
+  // En production, on veut que l'application démarre quand même pour voir les erreurs dans les logs
+  if (process.env.NODE_ENV === 'production') {
+    console.error('⚠️  Application démarrée malgré les erreurs de configuration');
+  } else {
+    throw error;
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;

@@ -4,6 +4,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { z } from 'zod';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { prisma } from '../lib/prisma';
+import { env } from '../config/env';
 
 const router = express.Router();
 
@@ -84,8 +85,8 @@ router.post('/register', async (req, res) => {
     });
 
     // Generate JWT
-    const jwtSecret = process.env.JWT_SECRET;
-    const jwtExpiresIn: string = process.env.JWT_EXPIRES_IN || '7d';
+    const jwtSecret = env.JWT_SECRET;
+    const jwtExpiresIn: string = env.JWT_EXPIRES_IN;
 
     if (!jwtSecret) {
       return res.status(500).json({ error: 'JWT secret not configured' });
@@ -151,7 +152,7 @@ router.post('/register', async (req, res) => {
         }
         
         // Check if it's a Supabase connection issue
-        const isSupabase = prismaError.message?.includes('supabase') || process.env.DATABASE_URL?.includes('supabase');
+        const isSupabase = prismaError.message?.includes('supabase') || env.DATABASE_URL?.includes('supabase');
         if (isSupabase) {
           return res.status(500).json({ 
             error: 'Database connection failed',
@@ -195,13 +196,13 @@ router.post('/login', async (req, res) => {
   try {
     console.log('Login request received');
     
-    // Check environment variables first
-    if (!process.env.JWT_SECRET) {
+    // Check environment variables first (utilise la config centralisée)
+    if (!env.JWT_SECRET) {
       console.error('JWT_SECRET is not configured');
       return res.status(500).json({ error: 'Server configuration error: JWT_SECRET missing' });
     }
     
-    if (!process.env.DATABASE_URL) {
+    if (!env.DATABASE_URL) {
       console.error('DATABASE_URL is not configured');
       return res.status(500).json({ error: 'Server configuration error: DATABASE_URL missing' });
     }
@@ -250,8 +251,8 @@ router.post('/login', async (req, res) => {
     console.log('Password valid, generating token...');
 
     // Generate JWT
-    const jwtSecret = process.env.JWT_SECRET;
-    const jwtExpiresIn: string = process.env.JWT_EXPIRES_IN || '7d';
+    const jwtSecret = env.JWT_SECRET;
+    const jwtExpiresIn: string = env.JWT_EXPIRES_IN;
 
     if (!jwtSecret) {
       return res.status(500).json({ error: 'JWT secret not configured' });
