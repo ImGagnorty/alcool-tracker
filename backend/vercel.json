@@ -8,12 +8,6 @@
       "destination": "/api"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   }
