@@ -86,13 +86,27 @@ api.interceptors.response.use(
     } else if (error.response?.status === 403) {
       // Forbidden - usually means invalid/expired token or missing authentication
       const errorMessage = error.response?.data?.error || 'Forbidden';
-      console.error('403 Forbidden:', error.config?.url, errorMessage);
+      const errorData = error.response?.data;
+      
+      console.error('403 Forbidden:', error.config?.url, errorMessage, errorData);
       
       // Check if it's an authentication issue
-      if (errorMessage.includes('token') || errorMessage.includes('Invalid') || errorMessage.includes('expired')) {
+      // Backend returns 403 for "Invalid or expired token" or "Access token required"
+      const isAuthError = 
+        errorMessage.includes('token') || 
+        errorMessage.includes('Invalid') || 
+        errorMessage.includes('expired') ||
+        errorMessage.includes('Access token required') ||
+        errorData?.error === 'Invalid or expired token' ||
+        errorData?.error === 'Access token required';
+      
+      if (isAuthError) {
         // Token is invalid or expired - clear it and redirect to login
+        console.log('Authentication error detected, clearing token and redirecting to login');
         localStorage.removeItem('auth-storage');
         delete api.defaults.headers.common['Authorization'];
+        
+        // Redirect to login if not already there
         if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
           window.location.href = '/login';
         }
@@ -101,6 +115,7 @@ api.interceptors.response.use(
         const token = updateTokenFromStorage();
         if (!token && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
           // No token at all - redirect to login
+          console.log('No token found, redirecting to login');
           window.location.href = '/login';
         }
       }

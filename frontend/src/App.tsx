@@ -13,8 +13,14 @@ import Clans from './pages/Clans';
 import ConsumptionHistory from './pages/ConsumptionHistory';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { token } = useAuthStore();
-  return token ? <>{children}</> : <Navigate to="/login" />;
+  const { token, user } = useAuthStore();
+  
+  // If no token or user, redirect to login
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
 }
 
 function App() {
