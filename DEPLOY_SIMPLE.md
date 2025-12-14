@@ -65,10 +65,15 @@ Maintenant, il faut configurer les variables d'environnement du backend :
    - `FRONTEND_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `FRONTEND_VERCEL_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `DATABASE_URL` = Votre URL PostgreSQL
-     - ⚠️ **Pour Supabase** : Utilisez le **Connection Pooler** (port 6543) au lieu du port direct (5432)
-     - Format Supabase avec pooler : `postgresql://user:password@db.xxxxx.supabase.co:6543/database?pgbouncer=true`
-     - Ou utilisez le format direct avec SSL : `postgresql://user:password@db.xxxxx.supabase.co:5432/database?sslmode=require`
-     - Vérifiez dans Supabase : **Settings** → **Database** → **Connection Pooling** → Utilisez l'URL du pooler
+     - ⚠️ **POUR SUPABASE - TRÈS IMPORTANT** : 
+       - ❌ **NE PAS utiliser** : `db.xxxxx.supabase.co:5432` (port direct - ne fonctionne pas avec Vercel)
+       - ✅ **UTILISER** : L'URL du **Session Pooler** avec le port **6543**
+       - **Comment obtenir l'URL du pooler** :
+         1. Dans Supabase → **Settings** → **Database** → **Connection Pooling**
+         2. Changez **"Method"** de **"Direct connection"** à **"Session mode"**
+         3. Copiez l'URL qui s'affiche (elle contiendra `pooler.supabase.com:6543`)
+         4. Format attendu : `postgresql://postgres.xxxxx:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+       - ⚠️ **Si vous voyez encore `:5432` dans votre URL, c'est la mauvaise URL !**
    - `JWT_SECRET` = Votre secret JWT
 4. Cochez : ✅ Production, ✅ Preview, ✅ Development pour toutes les variables
    
