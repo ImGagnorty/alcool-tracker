@@ -38,14 +38,19 @@ Avant de cliquer sur "Deploy", cliquez sur **"Environment Variables"** et ajoute
 
 ### 3.4 Mettre à jour le backend
 
-Maintenant, il faut dire au backend quelle est l'URL du frontend :
+Maintenant, il faut configurer les variables d'environnement du backend :
 
 1. Retournez dans votre projet **backend** sur Vercel
 2. Allez dans **Settings** → **Environment Variables**
-3. Trouvez `FRONTEND_URL` et modifiez-la :
-   - Remplacez `http://localhost:3000` par l'URL de votre frontend (ex: `https://alcool-tracker-frontend-xxxxx.vercel.app`)
-4. Cliquez sur **"Save"**
-5. Vercel redéploiera automatiquement le backend
+3. Vérifiez/ajoutez ces variables :
+   - `NODE_ENV` = `production` ⚠️ **TRÈS IMPORTANT pour le CORS !**
+   - `FRONTEND_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
+   - `FRONTEND_VERCEL_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
+   - `DATABASE_URL` = Votre URL PostgreSQL
+   - `JWT_SECRET` = Votre secret JWT
+4. Cochez : ✅ Production, ✅ Preview, ✅ Development pour toutes les variables
+5. Cliquez sur **"Save"**
+6. Vercel redéploiera automatiquement le backend
 
 ---
 
