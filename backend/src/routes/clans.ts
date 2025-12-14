@@ -1,10 +1,10 @@
 import express from 'express';
-import { PrismaClient, ClanRole } from '@prisma/client';
+import { ClanRole } from '@prisma/client';
 import { z } from 'zod';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { prisma } from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Validation schemas
 const createClanSchema = z.object({

@@ -1,12 +1,11 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { prisma } from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Validation schemas
 const registerSchema = z.object({
@@ -143,12 +142,20 @@ router.post('/register', async (req, res) => {
         console.error('Database connection error - DATABASE_URL might be incorrect or database is unreachable');
         console.error('Error details:', prismaError.message);
         
+        // Check for max clients error (Supabase pool exhaustion)
+        if (prismaError.message?.includes('MaxClientsInSessionMode') || prismaError.message?.includes('max clients reached')) {
+          return res.status(500).json({ 
+            error: 'Database connection pool exhausted',
+            message: 'Too many database connections. Please: 1) Use Transaction mode instead of Session mode in Supabase Connection Pooling, 2) Wait a few seconds and try again, 3) Consider using Prisma Data Proxy or Prisma Accelerate for better connection management.'
+          });
+        }
+        
         // Check if it's a Supabase connection issue
         const isSupabase = prismaError.message?.includes('supabase') || process.env.DATABASE_URL?.includes('supabase');
         if (isSupabase) {
           return res.status(500).json({ 
             error: 'Database connection failed',
-            message: 'Cannot reach Supabase database. Please check: 1) DATABASE_URL uses connection pooling (port 6543 or ?pgbouncer=true), 2) Database is running, 3) IP restrictions allow Vercel IPs, 4) Connection pooling is enabled in Supabase settings.'
+            message: 'Cannot reach Supabase database. Please check: 1) DATABASE_URL uses connection pooling (port 6543 or ?pgbouncer=true), 2) Use Transaction mode instead of Session mode, 3) Database is running, 4) IP restrictions allow Vercel IPs.'
           });
         }
         
@@ -299,6 +306,13 @@ router.post('/login', async (req, res) => {
     if (error && typeof error === 'object' && 'code' in error) {
       const prismaError = error as any;
       if (prismaError.code === 'P1001' || prismaError.code === 'P1000' || prismaError.name === 'PrismaClientInitializationError') {
+        // Check for max clients error (Supabase pool exhaustion)
+        if (prismaError.message?.includes('MaxClientsInSessionMode') || prismaError.message?.includes('max clients reached')) {
+          return res.status(500).json({ 
+            error: 'Database connection pool exhausted',
+            message: 'Too many database connections. Please: 1) Use Transaction mode instead of Session mode in Supabase Connection Pooling, 2) Wait a few seconds and try again.'
+          });
+        }
         return res.status(500).json({ 
           error: 'Database connection failed',
           message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
