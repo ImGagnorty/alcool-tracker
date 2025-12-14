@@ -21,24 +21,45 @@ const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Middleware CORS - Autoriser plusieurs origines en production
-const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
+const vercelRegex = /^https:\/\/.*\.vercel\.app$/;
+const allowedOrigins: (string | RegExp)[] = process.env.NODE_ENV === 'production'
   ? [
       FRONTEND_URL,
       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-      process.env.FRONTEND_VERCEL_URL
-    ].filter((url): url is string => url !== undefined)
+      process.env.FRONTEND_VERCEL_URL,
+      // Autoriser toutes les origines Vercel pour le frontend
+      vercelRegex
+    ].filter((url): url is string | RegExp => url !== undefined)
   : [FRONTEND_URL, 'http://localhost:3000'];
 
 app.use(cors({
   origin: (origin, callback) => {
     // Autoriser les requêtes sans origine (mobile apps, Postman, etc.)
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    
+    // Vérifier si l'origine est dans la liste autorisée
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return origin === allowed;
+      }
+      // Si c'est une regex (pour Vercel)
+      return allowed.test(origin);
+    });
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
+      console.log('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

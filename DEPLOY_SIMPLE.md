@@ -9,9 +9,9 @@
    - **Project Name** : `alcool-tracker-frontend` (ou ce que vous voulez)
    - **Root Directory** : Cliquez sur **"Edit"** et tapez : `frontend`
    - **Framework Preset** : Sélectionnez **"Vite"** (Vercel le détectera peut-être automatiquement)
-   - **Build Command** : `npm run build`
+   - **Build Command** : `npm run build` ⚠️ **ATTENTION** : Vérifiez bien que c'est `npm` et pas `nom` !
    - **Output Directory** : `dist`
-   - **Install Command** : `npm install`
+   - **Install Command** : `npm install` ⚠️ **ATTENTION** : Vérifiez bien que c'est `npm` et pas `nom` !
 
 ### 3.2 Ajouter les variables d'environnement
 
@@ -19,8 +19,8 @@ Avant de cliquer sur "Deploy", cliquez sur **"Environment Variables"** et ajoute
 
 **Variable 1** :
 - **Name** : `VITE_API_URL`
-- **Value** : L'URL de votre backend (ex: `https://alcool-tracker-backend-xxxxx.vercel.app`)
-- ⚠️ **IMPORTANT** : Pas de `/api` à la fin, juste l'URL de base !
+- **Value** : L'URL de votre backend avec `/api` à la fin (ex: `https://alcool-tracker.vercel.app/api`)
+- ⚠️ **IMPORTANT** : L'URL doit se terminer par `/api` !
 - Cochez : ✅ Production, ✅ Preview, ✅ Development
 
 ### 3.3 Déployer
