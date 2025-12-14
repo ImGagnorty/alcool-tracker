@@ -90,10 +90,9 @@ if (process.env.VERCEL !== '1') {
 
 // Export pour Vercel serverless
 // Vercel utilise @vercel/node qui attend un handler Express
+// Export ES module
 export default app;
 
-// Export aussi en CommonJS pour compatibilité
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = app;
-}
+// Export CommonJS pour compatibilité (nécessaire pour api/index.js)
+module.exports = app;
 
