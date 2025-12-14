@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['icon.ico', 'favicon.ico', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'AlcoolTracker - Suivi de Consommation',
         short_name: 'AlcoolTracker',
