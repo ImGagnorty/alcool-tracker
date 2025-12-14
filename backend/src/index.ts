@@ -22,16 +22,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Middleware CORS - Autoriser plusieurs origines en production
 const vercelRegex = /^https:\/\/.*\.vercel\.app$/;
-const allowedOrigins: (string | RegExp)[] = process.env.NODE_ENV === 'production'
-  ? [
-      FRONTEND_URL,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-      process.env.FRONTEND_VERCEL_URL,
-      // Autoriser toutes les origines Vercel pour le frontend
-      vercelRegex
-    ].filter((url): url is string | RegExp => url !== undefined)
-  : [FRONTEND_URL, 'http://localhost:3000'];
 
+// En production, autoriser toutes les origines Vercel
 app.use(cors({
   origin: (origin, callback) => {
     // Autoriser les requêtes sans origine (mobile apps, Postman, etc.)
@@ -40,26 +32,37 @@ app.use(cors({
       return;
     }
     
-    // Vérifier si l'origine est dans la liste autorisée
-    const isAllowed = allowedOrigins.some(allowed => {
-      if (typeof allowed === 'string') {
-        return origin === allowed;
+    // En développement, autoriser localhost
+    if (process.env.NODE_ENV !== 'production') {
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        callback(null, true);
+        return;
       }
-      // Si c'est une regex (pour Vercel)
-      return allowed.test(origin);
-    });
+    }
     
-    if (isAllowed) {
+    // En production, autoriser :
+    // 1. L'URL du frontend configurée
+    // 2. Toutes les origines Vercel (*.vercel.app)
+    // 3. L'URL Vercel du backend lui-même
+    const isVercelOrigin = vercelRegex.test(origin);
+    const isFrontendURL = origin === FRONTEND_URL;
+    const isBackendVercelURL = process.env.VERCEL_URL && origin === `https://${process.env.VERCEL_URL}`;
+    const isFrontendVercelURL = process.env.FRONTEND_VERCEL_URL && origin === process.env.FRONTEND_VERCEL_URL;
+    
+    if (isVercelOrigin || isFrontendURL || isBackendVercelURL || isFrontendVercelURL) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      console.log('Allowed origins:', allowedOrigins);
+      console.log('NODE_ENV:', process.env.NODE_ENV);
+      console.log('FRONTEND_URL:', FRONTEND_URL);
+      console.log('VERCEL_URL:', process.env.VERCEL_URL);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'Content-Type']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
