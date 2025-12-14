@@ -55,19 +55,42 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 
     console.log('Query where clause:', JSON.stringify(where));
 
-    const [consumptions, total] = await Promise.all([
-      prisma.consumption.findMany({
-        where,
-        include: {
-          alcohol: true,
-          bar: true
-        },
-        orderBy: { date: 'desc' },
-        skip,
-        take: limitNum
-      }),
-      prisma.consumption.count({ where })
-    ]);
+    // Try to get consumptions with error handling for relations
+    let consumptions;
+    let total;
+    
+    try {
+      [consumptions, total] = await Promise.all([
+        prisma.consumption.findMany({
+          where,
+          include: {
+            alcohol: true,
+            bar: true
+          },
+          orderBy: { date: 'desc' },
+          skip,
+          take: limitNum
+        }),
+        prisma.consumption.count({ where })
+      ]);
+    } catch (dbError: any) {
+      console.error('Database query error:', dbError);
+      // If there's an error with relations, try without them
+      if (dbError.code === 'P2025' || dbError.message?.includes('relation') || dbError.message?.includes('does not exist')) {
+        console.log('Trying without relations...');
+        [consumptions, total] = await Promise.all([
+          prisma.consumption.findMany({
+            where,
+            orderBy: { date: 'desc' },
+            skip,
+            take: limitNum
+          }),
+          prisma.consumption.count({ where })
+        ]);
+      } else {
+        throw dbError;
+      }
+    }
 
     console.log(`Found ${consumptions.length} consumptions for user ${req.userId}`);
 
