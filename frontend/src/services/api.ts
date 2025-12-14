@@ -17,18 +17,40 @@ const api = axios.create({
   }
 });
 
-// Add token from storage if available
-const token = localStorage.getItem('auth-storage');
-if (token) {
-  try {
-    const parsed = JSON.parse(token);
-    if (parsed.state?.token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${parsed.state.token}`;
+// Function to update token from storage
+const updateTokenFromStorage = () => {
+  const token = localStorage.getItem('auth-storage');
+  if (token) {
+    try {
+      const parsed = JSON.parse(token);
+      if (parsed.state?.token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${parsed.state.token}`;
+        return parsed.state.token;
+      }
+    } catch (e) {
+      // Ignore
     }
-  } catch (e) {
-    // Ignore
   }
-}
+  return null;
+};
+
+// Set initial token
+updateTokenFromStorage();
+
+// Request interceptor to ensure token is always up to date
+api.interceptors.request.use(
+  (config) => {
+    // Update token before each request
+    const token = updateTokenFromStorage();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Response interceptor for error handling
 api.interceptors.response.use(
@@ -37,7 +59,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('auth-storage');
-      window.location.href = '/login';
+      delete api.defaults.headers.common['Authorization'];
+      // Only redirect if we're not already on login/register page
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
