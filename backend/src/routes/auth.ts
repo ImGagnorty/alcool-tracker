@@ -87,16 +87,38 @@ router.post('/register', async (req, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Invalid input', details: error.errors });
     }
+    
+    // Log detailed error information
     console.error('Register error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     
-    // Return more detailed error in development
+    // Check for specific Prisma errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P2002') {
+        return res.status(400).json({ error: 'Email already registered' });
+      }
+      if (prismaError.code === 'P1001') {
+        console.error('Database connection error - DATABASE_URL might be incorrect');
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
+        });
+      }
+    }
+    
+    // Return more detailed error
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    
     res.status(500).json({ 
       error: 'Registration failed',
-      message: process.env.NODE_ENV === 'development' ? errorMessage : 'Registration failed',
-      ...(process.env.NODE_ENV === 'development' && { stack: error instanceof Error ? error.stack : undefined })
+      message: isDevelopment ? errorMessage : 'Registration failed. Please check server logs.',
+      ...(isDevelopment && { 
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error instanceof Error ? error.toString() : String(error)
+      })
     });
   }
 });
