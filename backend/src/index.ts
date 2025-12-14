@@ -89,7 +89,10 @@ app.use('/api/clans', clanRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
+  console.error('Error:', err);
+  console.error('Error stack:', err.stack);
+  console.error('Request URL:', req.url);
+  console.error('Request method:', req.method);
   res.status(err.status || 500).json({
     error: {
       message: err.message || 'Internal server error',

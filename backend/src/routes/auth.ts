@@ -23,6 +23,19 @@ const loginSchema = z.object({
 // Register
 router.post('/register', async (req, res) => {
   try {
+    console.log('Register request received');
+    
+    // Check environment variables first
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not configured');
+      return res.status(500).json({ error: 'Server configuration error: JWT_SECRET missing' });
+    }
+    
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL is not configured');
+      return res.status(500).json({ error: 'Server configuration error: DATABASE_URL missing' });
+    }
+    
     const { email, password, name } = registerSchema.parse(req.body);
 
     // Check if user exists
@@ -75,7 +88,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Invalid input', details: error.errors });
     }
     console.error('Register error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    // Return more detailed error in development
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ 
+      error: 'Registration failed',
+      message: process.env.NODE_ENV === 'development' ? errorMessage : 'Registration failed',
+      ...(process.env.NODE_ENV === 'development' && { stack: error instanceof Error ? error.stack : undefined })
+    });
   }
 });
 
