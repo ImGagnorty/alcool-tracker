@@ -166,13 +166,19 @@ Les migrations doivent être exécutées sur votre base de données. Si ce n'est
 - Ajoutez `DATABASE_URL` dans les variables d'environnement Vercel
 
 **Si vous voyez "Can't reach database server" (Supabase)** :
-- ⚠️ **PROBLÈME COURANT** : Vous utilisez probablement le port direct (5432) au lieu du Connection Pooler
-- **Solution** : Utilisez le Connection Pooler de Supabase (port 6543)
-  1. Allez dans Supabase → **Settings** → **Database** → **Connection Pooling**
-  2. Copiez l'URL du **Connection Pooler** (port 6543)
-  3. Dans Vercel, mettez à jour `DATABASE_URL` avec cette URL
-  4. Format : `postgresql://user:password@db.xxxxx.supabase.co:6543/database?pgbouncer=true`
-- Vérifiez aussi dans Supabase → **Settings** → **Database** → **Network Restrictions** que les connexions externes sont autorisées
+- ⚠️ **PROBLÈME COURANT** : Vous utilisez le port direct (5432) qui n'est pas compatible IPv4 pour Vercel
+- **Solution** : Utilisez le **Session Pooler** de Supabase (port 6543)
+  
+  **Étapes détaillées :**
+  1. Dans la fenêtre Supabase que vous voyez, cliquez sur le bouton **"Pooler settings"** (en bas à droite de l'avertissement IPv4)
+  2. OU allez dans Supabase → **Settings** → **Database** → **Connection Pooling**
+  3. Changez le dropdown **"Method"** de **"Direct connection"** à **"Session mode"** ou **"Transaction mode"**
+  4. Copiez la nouvelle URL qui s'affiche (elle utilisera le port **6543** au lieu de 5432)
+  5. Format attendu : `postgresql://postgres.xxxxx:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+  6. Dans Vercel → **Settings** → **Environment Variables** → Mettez à jour `DATABASE_URL` avec cette nouvelle URL
+  7. Redéployez votre backend
+  
+  ⚠️ **Important** : Le port doit être **6543** (pooler) et non **5432** (direct)
 
 **Si vous voyez "relation 'users' does not exist"** :
 - Les migrations Prisma n'ont pas été exécutées
