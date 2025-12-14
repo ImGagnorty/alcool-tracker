@@ -172,6 +172,38 @@ Les migrations doivent être exécutées sur votre base de données. Si ce n'est
 
 ---
 
+## ⚠️ IMPORTANT : Migration de la base de données
+
+Après avoir déployé le backend avec les nouvelles fonctionnalités d'inscription, **vous devez exécuter la migration Prisma** :
+
+### Option 1 : Via Vercel (Recommandé pour production)
+
+1. Allez dans votre projet backend sur Vercel
+2. **Settings** → **Environment Variables**
+3. Vérifiez que `DATABASE_URL` est bien configuré
+4. Dans votre terminal local, connectez-vous à votre base de données et exécutez :
+   ```bash
+   cd backend
+   npx prisma migrate deploy
+   ```
+
+### Option 2 : Via votre interface de base de données
+
+Si vous utilisez Supabase, Neon, ou une autre plateforme :
+1. Connectez-vous à votre interface de base de données
+2. Exécutez manuellement cette migration SQL :
+   ```sql
+   ALTER TABLE "users" 
+   ADD COLUMN "acceptedRules" BOOLEAN NOT NULL DEFAULT false,
+   ADD COLUMN "acceptedTerms" BOOLEAN NOT NULL DEFAULT false,
+   ADD COLUMN "dateOfBirth" TIMESTAMP(3),
+   ADD COLUMN "termsAcceptedAt" TIMESTAMP(3);
+   ```
+
+⚠️ **Sans cette migration, l'inscription retournera une erreur 500 !**
+
+---
+
 ## ÉTAPE 4 : Tester (2 minutes)
 
 ### 4.1 Tester le frontend
