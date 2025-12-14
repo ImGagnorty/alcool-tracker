@@ -10,9 +10,22 @@ const prisma = new PrismaClient();
 
 // Validation schemas
 const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  name: z.string().optional()
+  email: z.string().email('Email invalide'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+  name: z.string().optional(),
+  dateOfBirth: z.string().refine((date) => {
+    if (!date) return false;
+    const birthDate = new Date(date);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 18;
+  }, 'Vous devez avoir au moins 18 ans pour utiliser cette application'),
+  acceptedTerms: z.boolean().refine((val) => val === true, 'Vous devez accepter les conditions d\'utilisation'),
+  acceptedRules: z.boolean().refine((val) => val === true, 'Vous devez accepter les règles et consignes d\'utilisation')
 });
 
 const loginSchema = z.object({
@@ -36,7 +49,7 @@ router.post('/register', async (req, res) => {
       return res.status(500).json({ error: 'Server configuration error: DATABASE_URL missing' });
     }
     
-    const { email, password, name } = registerSchema.parse(req.body);
+    const { email, password, name, dateOfBirth, acceptedTerms, acceptedRules } = registerSchema.parse(req.body);
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -55,7 +68,11 @@ router.post('/register', async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name: name || null
+        name: name || null,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        acceptedTerms,
+        acceptedRules,
+        termsAcceptedAt: acceptedTerms ? new Date() : null
       },
       select: {
         id: true,
@@ -84,26 +101,58 @@ router.post('/register', async (req, res) => {
       token
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
-    }
-    
-    // Log detailed error information
-    console.error('Register error:', error);
+    // Log the full error first for debugging
+    console.error('=== REGISTER ERROR START ===');
+    console.error('Error type:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    // Try to stringify the error for more details
+    try {
+      console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (e) {
+      console.error('Could not stringify error:', e);
+    }
+    console.error('=== REGISTER ERROR END ===');
+    
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return res.status(400).json({ 
+        error: 'Invalid input', 
+        message: errorMessages,
+        details: error.errors 
+      });
+    }
     
     // Check for specific Prisma errors
     if (error && typeof error === 'object' && 'code' in error) {
       const prismaError = error as any;
+      
+      // Unique constraint violation (email already exists)
       if (prismaError.code === 'P2002') {
-        return res.status(400).json({ error: 'Email already registered' });
+        const field = prismaError.meta?.target?.[0] || 'field';
+        return res.status(400).json({ 
+          error: `${field === 'email' ? 'Email' : 'Field'} already exists`,
+          message: 'This email is already registered'
+        });
       }
-      if (prismaError.code === 'P1001') {
-        console.error('Database connection error - DATABASE_URL might be incorrect');
+      
+      // Database connection errors
+      if (prismaError.code === 'P1001' || prismaError.code === 'P1000') {
+        console.error('Database connection error - DATABASE_URL might be incorrect or database is unreachable');
         return res.status(500).json({ 
           error: 'Database connection failed',
-          message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
+          message: 'Cannot reach database server. Please check DATABASE_URL configuration and ensure the database is accessible.'
+        });
+      }
+      
+      // Table/column doesn't exist (migration not run)
+      if (prismaError.code === 'P2021' || prismaError.code === 'P2025') {
+        console.error('Database schema error - migrations might not be applied');
+        return res.status(500).json({ 
+          error: 'Database schema error',
+          message: 'Database schema is not up to date. Please run migrations.'
         });
       }
     }
@@ -114,7 +163,7 @@ router.post('/register', async (req, res) => {
     
     res.status(500).json({ 
       error: 'Registration failed',
-      message: isDevelopment ? errorMessage : 'Registration failed. Please check server logs.',
+      message: isDevelopment ? errorMessage : 'Registration failed. Please check server logs for details.',
       ...(isDevelopment && { 
         stack: error instanceof Error ? error.stack : undefined,
         details: error instanceof Error ? error.toString() : String(error)

@@ -15,6 +15,10 @@ model User {
   email         String       @unique
   password      String
   name          String?
+  dateOfBirth   DateTime?    // Date de naissance pour vérifier l'âge
+  acceptedTerms Boolean      @default(false) // Acceptation des conditions d'utilisation
+  acceptedRules Boolean      @default(false) // Acceptation des règles/consignes
+  termsAcceptedAt DateTime? // Date d'acceptation des CGU
   isPremium     Boolean      @default(false)
   premiumUntil  DateTime?
   blurUsername  Boolean      @default(false) // Flouter le pseudo dans les classements
