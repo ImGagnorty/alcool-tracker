@@ -65,6 +65,10 @@ Maintenant, il faut configurer les variables d'environnement du backend :
    - `FRONTEND_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `FRONTEND_VERCEL_URL` = L'URL de votre frontend (ex: `https://alcool-tracker-frontend.vercel.app`)
    - `DATABASE_URL` = Votre URL PostgreSQL
+     - ⚠️ **Pour Supabase** : Utilisez le **Connection Pooler** (port 6543) au lieu du port direct (5432)
+     - Format Supabase avec pooler : `postgresql://user:password@db.xxxxx.supabase.co:6543/database?pgbouncer=true`
+     - Ou utilisez le format direct avec SSL : `postgresql://user:password@db.xxxxx.supabase.co:5432/database?sslmode=require`
+     - Vérifiez dans Supabase : **Settings** → **Database** → **Connection Pooling** → Utilisez l'URL du pooler
    - `JWT_SECRET` = Votre secret JWT
 4. Cochez : ✅ Production, ✅ Preview, ✅ Development pour toutes les variables
    
@@ -161,10 +165,14 @@ Les migrations doivent être exécutées sur votre base de données. Si ce n'est
 **Si vous voyez "DATABASE_URL missing"** :
 - Ajoutez `DATABASE_URL` dans les variables d'environnement Vercel
 
-**Si vous voyez "Can't reach database server"** :
-- Vérifiez que votre `DATABASE_URL` est correct
-- Vérifiez que votre base de données accepte les connexions externes
-- Pour Supabase : Vérifiez les paramètres de sécurité
+**Si vous voyez "Can't reach database server" (Supabase)** :
+- ⚠️ **PROBLÈME COURANT** : Vous utilisez probablement le port direct (5432) au lieu du Connection Pooler
+- **Solution** : Utilisez le Connection Pooler de Supabase (port 6543)
+  1. Allez dans Supabase → **Settings** → **Database** → **Connection Pooling**
+  2. Copiez l'URL du **Connection Pooler** (port 6543)
+  3. Dans Vercel, mettez à jour `DATABASE_URL` avec cette URL
+  4. Format : `postgresql://user:password@db.xxxxx.supabase.co:6543/database?pgbouncer=true`
+- Vérifiez aussi dans Supabase → **Settings** → **Database** → **Network Restrictions** que les connexions externes sont autorisées
 
 **Si vous voyez "relation 'users' does not exist"** :
 - Les migrations Prisma n'ont pas été exécutées

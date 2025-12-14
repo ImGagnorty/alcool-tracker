@@ -139,8 +139,19 @@ router.post('/register', async (req, res) => {
       }
       
       // Database connection errors
-      if (prismaError.code === 'P1001' || prismaError.code === 'P1000') {
+      if (prismaError.code === 'P1001' || prismaError.code === 'P1000' || prismaError.name === 'PrismaClientInitializationError') {
         console.error('Database connection error - DATABASE_URL might be incorrect or database is unreachable');
+        console.error('Error details:', prismaError.message);
+        
+        // Check if it's a Supabase connection issue
+        const isSupabase = prismaError.message?.includes('supabase') || process.env.DATABASE_URL?.includes('supabase');
+        if (isSupabase) {
+          return res.status(500).json({ 
+            error: 'Database connection failed',
+            message: 'Cannot reach Supabase database. Please check: 1) DATABASE_URL uses connection pooling (port 6543 or ?pgbouncer=true), 2) Database is running, 3) IP restrictions allow Vercel IPs, 4) Connection pooling is enabled in Supabase settings.'
+          });
+        }
+        
         return res.status(500).json({ 
           error: 'Database connection failed',
           message: 'Cannot reach database server. Please check DATABASE_URL configuration and ensure the database is accessible.'
