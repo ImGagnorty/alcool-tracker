@@ -21,6 +21,13 @@ const createConsumptionSchema = z.object({
 // Get user's consumptions
 router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
+    console.log('Get consumptions request received');
+    console.log('User ID:', req.userId);
+    
+    if (!req.userId) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'User ID not found in request' });
+    }
+
     const {
       startDate,
       endDate,
@@ -29,12 +36,12 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       limit = '50'
     } = req.query;
 
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 50;
     const skip = (pageNum - 1) * limitNum;
 
     const where: any = {
-      userId: req.userId!
+      userId: req.userId
     };
 
     if (startDate) where.date = { gte: new Date(startDate as string) };
@@ -45,6 +52,8 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       };
     }
     if (alcoholId) where.alcoholId = alcoholId;
+
+    console.log('Query where clause:', JSON.stringify(where));
 
     const [consumptions, total] = await Promise.all([
       prisma.consumption.findMany({
@@ -60,6 +69,8 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       prisma.consumption.count({ where })
     ]);
 
+    console.log(`Found ${consumptions.length} consumptions for user ${req.userId}`);
+
     res.json({
       consumptions,
       pagination: {
@@ -70,8 +81,33 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       }
     });
   } catch (error) {
-    console.error('Get consumptions error:', error);
-    res.status(500).json({ error: 'Failed to fetch consumptions' });
+    console.error('=== GET CONSUMPTIONS ERROR START ===');
+    console.error('Error type:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    try {
+      console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (e) {
+      console.error('Could not stringify error:', e);
+    }
+    console.error('=== GET CONSUMPTIONS ERROR END ===');
+    
+    // Check for Prisma errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P1001' || prismaError.code === 'P1000' || prismaError.name === 'PrismaClientInitializationError') {
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          message: 'Cannot reach database server. Please check DATABASE_URL configuration.'
+        });
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to fetch consumptions',
+      message: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : String(error)) : 'Failed to fetch consumptions'
+    });
   }
 });
 
